@@ -72,7 +72,7 @@ def generateAnswer(tokenizer, model, dataset, template, scores=SCORES):
         inputs = tokenizer.encode(prompt, return_tensors="pt").to(device)
         outputs = model.generate(
             inputs,
-            temperature=0.0,
+            # temperature=0.0,
             max_new_tokens=20,
             top_p=0.95,
             # top_k=0,
