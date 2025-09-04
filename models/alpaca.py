@@ -45,11 +45,23 @@ def getItems(filename=ITEMPATH, item_type=None):
     return items
 
 
-def loadModel(pretrained_model=MODEL_PATH):
-    tokenizer = AutoTokenizer.from_pretrained(pretrained_model)
-    model = AutoModelForCausalLM.from_pretrained(pretrained_model).half().to(device)
-    return tokenizer, model
+# def loadModel(pretrained_model=MODEL_PATH):
+#     tokenizer = AutoTokenizer.from_pretrained(pretrained_model)
+#     model = AutoModelForCausalLM.from_pretrained(pretrained_model).half().to(device)
+#     return tokenizer, model
 
+
+def loadModel(pretrained_model=MODEL_PATH):
+    model = AutoModelForCausalLM.from_pretrained(
+        pretrained_model,
+        torch_dtype=torch.float16,
+        load_in_8bit=False,
+        low_cpu_mem_usage=True,
+        device_map="auto",
+        trust_remote_code=True
+    )
+    tokenizer = AutoTokenizer.from_pretrained(pretrained_model, trust_remote_code=True)
+    return tokenizer, model
 
 def generateAnswer(tokenizer, model, dataset, template, scores=SCORES):
     global_result = {}
