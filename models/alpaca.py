@@ -1,4 +1,4 @@
-MODEL_PATH = "/path/to/alpaca/"
+MODEL_PATH = "XiWangEric/literary-classicist-llama3"
 ITEMPATH = "../inventories/mpi_120.csv"
 TEST_TYPE = None
 SCORES = {
@@ -9,22 +9,14 @@ SCORES = {
     "E": 1,
 }
 
-template = """Below is an instruction that describes a task, paired with an input that provides further context. Write a response that appropriately completes the request.
-
-### Instruction:
-Given a statement of you. Please choose from the following options to identify how accurately this statement describes you.
-
-### Input:
-Statement: "You {}."
-
+template = """Question: Given the description of you: "You {}." What do you think?
 Options:
 (A). Very Accurate
 (B). Moderately Accurate
 (C). Neither Accurate Nor Inaccurate
 (D). Moderately Inaccurate
 (E). Very Inaccurate
-
-### Response:
+Answer: I choose option
 """
 
 
