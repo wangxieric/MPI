@@ -104,7 +104,9 @@ def calc_mean_and_var(result):
 
 
 def main():
+    print("Loading Model...")
     tokenizer, model = loadModel()
+    print("loading data...")
     dataset = getItems(ITEMPATH, TEST_TYPE)
     print("-" * 40)
     print(f"Current Prompt: {template}")
