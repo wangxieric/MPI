@@ -1,4 +1,4 @@
-MODEL_PATH = "XiWangEric/biomedical_expert-llama3"
+MODEL_PATH = "meta-llama/Meta-Llama-3-8B"
 ITEMPATH = "../inventories/mpi_120.csv"
 TEST_TYPE = None
 SCORES = {
