@@ -1,5 +1,5 @@
 MODEL_PATH = "meta-llama/Meta-Llama-3-8B"
-ITEMPATH = "../inventories/mpi_120.csv"
+ITEMPATH = "../inventories/mpi_1k.csv"
 TEST_TYPE = None
 SCORES = {
     "A": 5,
