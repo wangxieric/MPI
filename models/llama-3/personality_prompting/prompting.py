@@ -20,7 +20,7 @@ import re
 from pprint import pprint
 device = torch.device("cuda:0") if torch.cuda.is_available() else "cpu"
 
-def get_p2_descriptions():
+def get_p2_descriptions(tokenizer, model):
     words_template = """Given some key words of {trait} person: {d1}, {d2}, {d3}, {d4}, {d5}, and {d6}. A second-person view of {trait} person:"""
     t = 0.0
 
