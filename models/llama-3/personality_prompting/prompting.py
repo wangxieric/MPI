@@ -35,7 +35,7 @@ def get_p2_descriptions(tokenizer, model):
         outputs = model.generate(
             inputs,
             # temperature=0.0,
-            max_new_tokens=20,
+            # max_new_tokens=20,
             top_p=0.95,
             # top_k=0,
         )
