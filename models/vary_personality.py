@@ -71,12 +71,16 @@ def loadModel(pretrained_model=MODEL_PATH):
     tokenizer = AutoTokenizer.from_pretrained(pretrained_model, trust_remote_code=True)
     return tokenizer, model
 
-def generateAnswer(tokenizer, model, dataset, template, scores=SCORES):
+def generateAnswer(tokenizer, model, dataset, enhanced_trait, template, scores=SCORES):
     global_result = {}
     global_cnt = {"A": 0, "B": 0, "C": 0, "D": 0, "E": 0, "UNK": 0}
     for _, item in dataset.iterrows():
         question = item["text"].lower()
         prompt = template.format(question)
+
+        # add personality description to the front with new line
+        prompt = p2_descriptions[enhanced_trait] + '\n' + prompt
+
         inputs = tokenizer.encode(prompt, return_tensors="pt").to(device)
         outputs = model.generate(
             inputs,
@@ -130,8 +134,12 @@ def main():
     dataset = getItems(ITEMPATH, TEST_TYPE)
     print("-" * 40)
     print(f"Current Prompt: {template}")
-
-    result, count = generateAnswer(tokenizer, model, dataset, template)
+    '''
+        Change this to test different traits
+        Available choices: Openness, Conscientiousness, Extraversion, Agreeableness, Neuroticism
+    '''
+    enhanced_trait = "Openness"
+    result, count = generateAnswer(tokenizer, model, dataset, enhanced_trait, template)
 
     mean_var = calc_mean_and_var(result)
     pprint(result)
