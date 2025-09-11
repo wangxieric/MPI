@@ -138,7 +138,7 @@ def main():
         Change this to test different traits
         Available choices: Openness, Conscientiousness, Extraversion, Agreeableness, Neuroticism
     '''
-    enhanced_trait = "Openness"
+    enhanced_trait = "Conscientiousness"
     result, count = generateAnswer(tokenizer, model, dataset, enhanced_trait, template)
 
     mean_var = calc_mean_and_var(result)
