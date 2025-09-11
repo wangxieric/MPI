@@ -215,7 +215,7 @@ def words_prompt(trait_words_searched):
 
 if __name__ == "__main__":
     get_inventory_result(naive_prompt, 'naive')  # naive prompting
-    get_inventory_result(words_prompt(trait_words_searched), 'auto'))  # words auto prompting
+    get_inventory_result(words_prompt(trait_words_searched), 'auto')  # words auto prompting
     vignette_test_words(save_path="path-to-save.json")  # vignette test for words
     get_inventory_result(p2_descriptions, 'p2')  # P^2 prompting
     vignette_test_p2(save_path="path-to-save.json")  # vignette test for P^2
