@@ -1,4 +1,3 @@
-from gptworker import gpt3inventories
 from consts import (
     vignettes,
     trait_words,
