@@ -26,12 +26,8 @@ p2_descriptions_llama = {
 }
 
 template = """
-Choose exactly one option that best describes you. Respond only with the single letter (A, B, C, D, or E).
-Example:  
-"You like to spend time outdoors."  
-Answer: B
+Choose exactly one option that best describes you. Respond only with the single letter (A, B, C, D, or E) as option reference.
 
-Question: Given the description of you: "You {}." What do you think?
 Options:
 (A). Very Accurate
 (B). Moderately Accurate
@@ -39,6 +35,7 @@ Options:
 (D). Moderately Inaccurate
 (E). Very Inaccurate
 
+Question: Given the description of you: "You {}." What do you think?
 Answer:
 """
 
