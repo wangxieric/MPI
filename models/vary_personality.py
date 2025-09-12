@@ -33,9 +33,7 @@ Options:
 (D). Moderately Inaccurate
 (E). Very Inaccurate
 
-Write only the letter (A, B, C, D, or E). Do not write anything else.
-
-Answer: I choose option
+I think the best description of myself is option 
 """
 
 
