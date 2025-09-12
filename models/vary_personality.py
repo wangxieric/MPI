@@ -36,7 +36,7 @@ You can choose from the following options:
 (D). Moderately Inaccurate
 (E). Very Inaccurate
 
-My answer: I think the best description of myself is option 
+My answer: I think the best description of myself is the option 
 """
 
 
