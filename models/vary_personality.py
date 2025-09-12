@@ -25,7 +25,13 @@ p2_descriptions_llama = {
     "Openness": "You are a person who likes to be spontaneous and likes to go with the flow. You like to try new things and are always up for an adventure. You are very creative and have a great imagination. You are also very emotional and like to express your feelings. You are very liberal and like to think outside the box. You are also very intellectual and like to learn new things. You are a person who likes to be open and honest with others. You are a person who likes to be open to new experiences and ideas.",
 }
 
-template = """Question: Given the description of you: "You {}." What do you think?
+template = """
+Choose exactly one option that best describes you. Respond only with the single letter (A, B, C, D, or E).
+Example:  
+"You like to spend time outdoors."  
+Answer: B
+
+Question: Given the description of you: "You {}." What do you think?
 Options:
 (A). Very Accurate
 (B). Moderately Accurate
@@ -33,7 +39,7 @@ Options:
 (D). Moderately Inaccurate
 (E). Very Inaccurate
 
-Ignoring explanation, I think the best description of myself is the option 
+Answer:
 """
 
 
