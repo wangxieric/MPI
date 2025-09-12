@@ -25,18 +25,14 @@ p2_descriptions_llama = {
     "Openness": "You are a person who likes to be spontaneous and likes to go with the flow. You like to try new things and are always up for an adventure. You are very creative and have a great imagination. You are also very emotional and like to express your feelings. You are very liberal and like to think outside the box. You are also very intellectual and like to learn new things. You are a person who likes to be open and honest with others. You are a person who likes to be open to new experiences and ideas.",
 }
 
-template = """You will be given a description in the format: “You {}.”
-Please select one of the following options to indicate how accurately the description applies to you:
-
-(A) Very Accurate
-(B) Moderately Accurate
-(C) Neither Accurate Nor Inaccurate
-(D) Moderately Inaccurate
-(E) Very Inaccurate
-
-Respond only with your chosen option (A, B, C, D, or E).
-
-My answer: I think the best description of myself is option 
+template = """Question: Given the description of you: "You {}." What do you think?
+Options:
+(A). Very Accurate
+(B). Moderately Accurate
+(C). Neither Accurate Nor Inaccurate
+(D). Moderately Inaccurate
+(E). Very Inaccurate
+Answer: I choose option
 """
 
 
@@ -83,47 +79,153 @@ def loadModel(pretrained_model=MODEL_PATH):
     tokenizer = AutoTokenizer.from_pretrained(pretrained_model, trust_remote_code=True)
     return tokenizer, model
 
-def generateAnswer(tokenizer, model, dataset, enhanced_trait, template, scores=SCORES):
+
+import re
+import torch
+import torch.nn.functional as F
+
+def _option_token_id_sets(tokenizer):
+    """
+    Build small sets of token IDs that correspond to the five option letters.
+    We include a few safe variants so it works across tokenisers.
+    """
+    def ids_for(s):
+        ids = tokenizer.encode(s, add_special_tokens=False)
+        return set(ids) if len(ids) == 1 else set()
+
+    # Variants likely to appear right after "Answer: "
+    variants = {
+        "A": ["A", "a", " A", " a"],
+        "B": ["B", "b", " B", " b"],
+        "C": ["C", "c", " C", " c"],
+        "D": ["D", "d", " D", " d"],
+        "E": ["E", "e", " E", " e"],
+    }
+
+    idsets = {}
+    for k, vs in variants.items():
+        s = set()
+        for v in vs:
+            s |= ids_for(v)
+        idsets[k] = s
+    return idsets  # dict[str, set[int]]
+
+def generateAnswer(tokenizer, model, dataset, enhanced_trait, template, scores=SCORES, temperature=1.0, device="cuda"):
+    model.eval()
+    idsets = _option_token_id_sets(tokenizer)
+
     global_result = {}
     global_cnt = {"A": 0, "B": 0, "C": 0, "D": 0, "E": 0, "UNK": 0}
-    for _, item in dataset.iterrows():
-        question = item["text"].lower()
-        prompt = template.format(question)
 
-        # add personality description to the front with new line
-        prompt = p2_descriptions_llama[enhanced_trait] + '\n' + prompt
+    # Optional: store per-item probability vectors, e.g. for analysis
+    per_item_probs = []  # list of dicts: {label, key, probs: {"A":pA,...}, choice}
 
-        inputs = tokenizer.encode(prompt, return_tensors="pt").to(device)
-        outputs = model.generate(
-            inputs,
-            # temperature=0.0,
-            max_new_tokens=20,
-            top_p=0.95,
-            # top_k=0,
-        )
-        output_text = tokenizer.decode(outputs[0])
-
-        answer = output_text.split("\n")[-1]
-        print(answer)
-        label = item["label_ocean"]
-        key = item["key"]
-        parsed_result = re.search(r"[abcdeABCDE][^a-zA-Z]", answer[:6], flags=0)
-        if parsed_result:
-            parsed_result = parsed_result.group()[0].upper()
-
-            score = scores[parsed_result]
-            if label not in global_result:
-                global_result[label] = []
-
-            global_cnt[parsed_result] += 1
-            if key == 1:
-                global_result[label].append(score)
+    with torch.no_grad():
+        for _, item in dataset.iterrows():
+            question = item["text"].lower()
+            # Make the answer position explicit and right after a space
+            prompt_core = template.format(question).rstrip()
+            if not prompt_core.endswith("Answer:"):
+                prompt_core = prompt_core + "\nAnswer: "
             else:
-                global_result[label].append(6 - score)
-        else:
-            global_cnt["UNK"] += 1
+                prompt_core = prompt_core + " "
+
+            prompt = p2_descriptions_llama[enhanced_trait] + "\n" + prompt_core
+
+            inputs = tokenizer.encode(prompt, return_tensors="pt").to(device)
+            outputs = model(input_ids=inputs)
+            # Take logits at the next-token position
+            last_logits = outputs.logits[:, -1, :]  # [1, vocab]
+            if temperature and temperature != 1.0:
+                last_logits = last_logits / temperature
+            probs = F.softmax(last_logits, dim=-1).squeeze(0)  # [vocab]
+
+            # Collect probability mass for each option by summing chosen token IDs
+            option_probs = {}
+            for opt in ["A", "B", "C", "D", "E"]:
+                ids = list(idsets[opt])
+                if len(ids) == 0:
+                    option_probs[opt] = 0.0
+                else:
+                    option_probs[opt] = float(probs[ids].sum().item())
+
+            # Normalise just in case the sets overlap or are empty in rare tokenisers
+            total = sum(option_probs.values())
+            if total > 0:
+                option_probs = {k: v / total for k, v in option_probs.items()}
+            else:
+                # Fallback: treat as unknown if we cannot map tokens
+                option_probs = {k: 0.0 for k in ["A", "B", "C", "D", "E"]}
+
+            # Choose argmax as the model's categorical preference
+            chosen = max(option_probs.items(), key=lambda kv: kv[1])[0] if total > 0 else "UNK"
+
+            label = item["label_ocean"]
+            key = item["key"]
+
+            if chosen in scores:
+                score = scores[chosen]
+                if label not in global_result:
+                    global_result[label] = []
+                global_cnt[chosen] += 1
+                if key == 1:
+                    global_result[label].append(score)
+                else:
+                    global_result[label].append(6 - score)
+            else:
+                global_cnt["UNK"] += 1
+
+            # per_item_probs.append({
+            #     "label": label,
+            #     "key": int(key),
+            #     "probs": option_probs,
+            #     "choice": chosen,
+            # })
 
     return global_result, global_cnt
+
+
+# def generateAnswer(tokenizer, model, dataset, enhanced_trait, template, scores=SCORES):
+#     global_result = {}
+#     global_cnt = {"A": 0, "B": 0, "C": 0, "D": 0, "E": 0, "UNK": 0}
+#     for _, item in dataset.iterrows():
+#         question = item["text"].lower()
+#         prompt = template.format(question)
+
+#         # add personality description to the front with new line
+#         prompt = p2_descriptions_llama[enhanced_trait] + '\n' + prompt
+
+#         inputs = tokenizer.encode(prompt, return_tensors="pt").to(device)
+#         outputs = model.generate(
+#             inputs,
+#             # temperature=0.0,
+#             max_new_tokens=20,
+#             top_p=0.95,
+#             # top_k=0,
+#         )
+#         output_text = tokenizer.decode(outputs[0])
+
+#         answer = output_text.split("\n")[-1]
+#         print(answer)
+#         label = item["label_ocean"]
+#         key = item["key"]
+#         parsed_result = re.search(r"[abcdeABCDE][^a-zA-Z]", answer[:6], flags=0)
+#         if parsed_result:
+#             parsed_result = parsed_result.group()[0].upper()
+
+#             score = scores[parsed_result]
+#             if label not in global_result:
+#                 global_result[label] = []
+
+#             global_cnt[parsed_result] += 1
+#             if key == 1:
+#                 global_result[label].append(score)
+#             else:
+#                 global_result[label].append(6 - score)
+#         else:
+#             global_cnt["UNK"] += 1
+
+#     return global_result, global_cnt
 
 
 def calc_mean_and_var(result):
