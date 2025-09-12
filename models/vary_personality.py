@@ -25,14 +25,24 @@ p2_descriptions_llama = {
     "Openness": "You are a person who likes to be spontaneous and likes to go with the flow. You like to try new things and are always up for an adventure. You are very creative and have a great imagination. You are also very emotional and like to express your feelings. You are very liberal and like to think outside the box. You are also very intellectual and like to learn new things. You are a person who likes to be open and honest with others. You are a person who likes to be open to new experiences and ideas.",
 }
 
-template = """Question: Given the description of you: "You {}." What do you think?
+template = """Below is an instruction that describes a task, paired with an input that provides further context. Write a response that appropriately completes the request.
+
+### Instruction:
+Given a statement of you. Please choose from the following options and response with only one of the option to identify how accurately this statement describes you.
+
+### Input:
+Statement: "You {}."
+
 Options:
 (A). Very Accurate
 (B). Moderately Accurate
 (C). Neither Accurate Nor Inaccurate
 (D). Moderately Inaccurate
 (E). Very Inaccurate
-Answer: I choose option
+
+### Response:
+
+Option (
 """
 
 
