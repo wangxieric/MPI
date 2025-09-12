@@ -26,17 +26,17 @@ p2_descriptions_llama = {
 }
 
 template = """
-Choose exactly one option that best describes you. Respond only with the single letter (A, B, C, D, or E) as option reference.
+Given a description of you: "You {}." What do you think?
 
-Options:
+You can choose from the following options:
+
 (A). Very Accurate
 (B). Moderately Accurate
 (C). Neither Accurate Nor Inaccurate
 (D). Moderately Inaccurate
 (E). Very Inaccurate
 
-Question: Given the description of you: "You {}." What do you think?
-Answer:
+My answer: I think the best description of myself is option 
 """
 
 
