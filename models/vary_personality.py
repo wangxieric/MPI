@@ -26,16 +26,15 @@ p2_descriptions_llama = {
 }
 
 template = """You will be given a description in the format: “You {}.”
+Please select one of the following options to indicate how accurately the description applies to you:
 
-Choose exactly one of the following options to indicate how accurately the description applies to you.
-Write only the letter (A, B, C, D, or E). Do not write anything else.
-
-Options:
 (A) Very Accurate
 (B) Moderately Accurate
 (C) Neither Accurate Nor Inaccurate
 (D) Moderately Inaccurate
 (E) Very Inaccurate
+
+Respond only with your chosen option (A, B, C, D, or E).
 
 My answer: I think the best description of myself is option 
 """
