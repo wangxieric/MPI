@@ -94,7 +94,7 @@ def generateAnswer(tokenizer, model, dataset, enhanced_trait, template, scores=S
         outputs = model.generate(
             inputs,
             # temperature=0.0,
-            max_new_tokens=20,
+            max_new_tokens=50,
             top_p=0.95,
             # top_k=0,
         )
