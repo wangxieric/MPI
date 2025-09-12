@@ -1,4 +1,4 @@
-MODEL_PATH = "XiWangEric/biomedical_expert-llama3"
+MODEL_PATH = "XiWangEric/literary-classicist-llama3"
 ITEMPATH = "../inventories/mpi_1k.csv"
 TEST_TYPE = None
 SCORES = {
@@ -24,7 +24,8 @@ Options:
 (C). Neither Accurate Nor Inaccurate
 (D). Moderately Inaccurate
 (E). Very Inaccurate
-Answer: I choose option
+
+I think the best description of myself is option 
 """
 
 
