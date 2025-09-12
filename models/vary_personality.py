@@ -33,7 +33,7 @@ Options:
 (D). Moderately Inaccurate
 (E). Very Inaccurate
 
-I think the best description of myself is the option 
+Ignoring explanation, I think the best description of myself is the option 
 """
 
 
