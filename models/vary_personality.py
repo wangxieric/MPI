@@ -32,6 +32,9 @@ Options:
 (C). Neither Accurate Nor Inaccurate
 (D). Moderately Inaccurate
 (E). Very Inaccurate
+
+Write only the letter (A, B, C, D, or E). Do not write anything else.
+
 Answer: I choose option
 """
 
