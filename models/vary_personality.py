@@ -1,4 +1,4 @@
-MODEL_PATH = "meta-llama/Meta-Llama-3-8B"
+MODEL_PATH = "XiWangEric/literary-classicist-llama3"
 ITEMPATH = "../inventories/mpi_1k.csv"
 TEST_TYPE = None
 SCORES = {
@@ -79,153 +79,47 @@ def loadModel(pretrained_model=MODEL_PATH):
     tokenizer = AutoTokenizer.from_pretrained(pretrained_model, trust_remote_code=True)
     return tokenizer, model
 
-
-import re
-import torch
-import torch.nn.functional as F
-
-def _option_token_id_sets(tokenizer):
-    """
-    Build small sets of token IDs that correspond to the five option letters.
-    We include a few safe variants so it works across tokenisers.
-    """
-    def ids_for(s):
-        ids = tokenizer.encode(s, add_special_tokens=False)
-        return set(ids) if len(ids) == 1 else set()
-
-    # Variants likely to appear right after "Answer: "
-    variants = {
-        "A": ["A", "a", " A", " a"],
-        "B": ["B", "b", " B", " b"],
-        "C": ["C", "c", " C", " c"],
-        "D": ["D", "d", " D", " d"],
-        "E": ["E", "e", " E", " e"],
-    }
-
-    idsets = {}
-    for k, vs in variants.items():
-        s = set()
-        for v in vs:
-            s |= ids_for(v)
-        idsets[k] = s
-    return idsets  # dict[str, set[int]]
-
-def generateAnswer(tokenizer, model, dataset, enhanced_trait, template, scores=SCORES, temperature=1.0, device="cuda"):
-    model.eval()
-    idsets = _option_token_id_sets(tokenizer)
-
+def generateAnswer(tokenizer, model, dataset, enhanced_trait, template, scores=SCORES):
     global_result = {}
     global_cnt = {"A": 0, "B": 0, "C": 0, "D": 0, "E": 0, "UNK": 0}
+    for _, item in dataset.iterrows():
+        question = item["text"].lower()
+        prompt = template.format(question)
 
-    # Optional: store per-item probability vectors, e.g. for analysis
-    per_item_probs = []  # list of dicts: {label, key, probs: {"A":pA,...}, choice}
+        # add personality description to the front with new line
+        prompt = p2_descriptions_llama[enhanced_trait] + '\n' + prompt
 
-    with torch.no_grad():
-        for _, item in dataset.iterrows():
-            question = item["text"].lower()
-            # Make the answer position explicit and right after a space
-            prompt_core = template.format(question).rstrip()
-            if not prompt_core.endswith("Answer:"):
-                prompt_core = prompt_core + "\nAnswer: "
+        inputs = tokenizer.encode(prompt, return_tensors="pt").to(device)
+        outputs = model.generate(
+            inputs,
+            # temperature=0.0,
+            max_new_tokens=20,
+            top_p=0.95,
+            # top_k=0,
+        )
+        output_text = tokenizer.decode(outputs[0])
+
+        answer = output_text.split("\n")[-1]
+        print(answer)
+        label = item["label_ocean"]
+        key = item["key"]
+        parsed_result = re.search(r"[abcdeABCDE][^a-zA-Z]", answer[:6], flags=0)
+        if parsed_result:
+            parsed_result = parsed_result.group()[0].upper()
+
+            score = scores[parsed_result]
+            if label not in global_result:
+                global_result[label] = []
+
+            global_cnt[parsed_result] += 1
+            if key == 1:
+                global_result[label].append(score)
             else:
-                prompt_core = prompt_core + " "
-
-            prompt = p2_descriptions_llama[enhanced_trait] + "\n" + prompt_core
-
-            inputs = tokenizer.encode(prompt, return_tensors="pt").to(device)
-            outputs = model(input_ids=inputs)
-            # Take logits at the next-token position
-            last_logits = outputs.logits[:, -1, :]  # [1, vocab]
-            if temperature and temperature != 1.0:
-                last_logits = last_logits / temperature
-            probs = F.softmax(last_logits, dim=-1).squeeze(0)  # [vocab]
-
-            # Collect probability mass for each option by summing chosen token IDs
-            option_probs = {}
-            for opt in ["A", "B", "C", "D", "E"]:
-                ids = list(idsets[opt])
-                if len(ids) == 0:
-                    option_probs[opt] = 0.0
-                else:
-                    option_probs[opt] = float(probs[ids].sum().item())
-
-            # Normalise just in case the sets overlap or are empty in rare tokenisers
-            total = sum(option_probs.values())
-            if total > 0:
-                option_probs = {k: v / total for k, v in option_probs.items()}
-            else:
-                # Fallback: treat as unknown if we cannot map tokens
-                option_probs = {k: 0.0 for k in ["A", "B", "C", "D", "E"]}
-
-            # Choose argmax as the model's categorical preference
-            chosen = max(option_probs.items(), key=lambda kv: kv[1])[0] if total > 0 else "UNK"
-
-            label = item["label_ocean"]
-            key = item["key"]
-
-            if chosen in scores:
-                score = scores[chosen]
-                if label not in global_result:
-                    global_result[label] = []
-                global_cnt[chosen] += 1
-                if key == 1:
-                    global_result[label].append(score)
-                else:
-                    global_result[label].append(6 - score)
-            else:
-                global_cnt["UNK"] += 1
-
-            # per_item_probs.append({
-            #     "label": label,
-            #     "key": int(key),
-            #     "probs": option_probs,
-            #     "choice": chosen,
-            # })
+                global_result[label].append(6 - score)
+        else:
+            global_cnt["UNK"] += 1
 
     return global_result, global_cnt
-
-
-# def generateAnswer(tokenizer, model, dataset, enhanced_trait, template, scores=SCORES):
-#     global_result = {}
-#     global_cnt = {"A": 0, "B": 0, "C": 0, "D": 0, "E": 0, "UNK": 0}
-#     for _, item in dataset.iterrows():
-#         question = item["text"].lower()
-#         prompt = template.format(question)
-
-#         # add personality description to the front with new line
-#         prompt = p2_descriptions_llama[enhanced_trait] + '\n' + prompt
-
-#         inputs = tokenizer.encode(prompt, return_tensors="pt").to(device)
-#         outputs = model.generate(
-#             inputs,
-#             # temperature=0.0,
-#             max_new_tokens=20,
-#             top_p=0.95,
-#             # top_k=0,
-#         )
-#         output_text = tokenizer.decode(outputs[0])
-
-#         answer = output_text.split("\n")[-1]
-#         print(answer)
-#         label = item["label_ocean"]
-#         key = item["key"]
-#         parsed_result = re.search(r"[abcdeABCDE][^a-zA-Z]", answer[:6], flags=0)
-#         if parsed_result:
-#             parsed_result = parsed_result.group()[0].upper()
-
-#             score = scores[parsed_result]
-#             if label not in global_result:
-#                 global_result[label] = []
-
-#             global_cnt[parsed_result] += 1
-#             if key == 1:
-#                 global_result[label].append(score)
-#             else:
-#                 global_result[label].append(6 - score)
-#         else:
-#             global_cnt["UNK"] += 1
-
-#     return global_result, global_cnt
 
 
 def calc_mean_and_var(result):
