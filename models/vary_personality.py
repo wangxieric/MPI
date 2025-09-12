@@ -1,4 +1,4 @@
-MODEL_PATH = "XiWangEric/literary-classicist-llama3"
+MODEL_PATH = "meta-llama/Llama-3.1-8B-Instruct"
 ITEMPATH = "../inventories/mpi_1k.csv"
 TEST_TYPE = None
 SCORES = {
