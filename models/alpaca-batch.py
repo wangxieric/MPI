@@ -1,4 +1,28 @@
-MODEL_PATH = "XiWangEric/literary-classicist-llama3"
+import os
+import pandas as pd
+import torch
+import numpy as np
+from tqdm import tqdm
+from transformers import AutoTokenizer, AutoModelForCausalLM
+import re
+from pprint import pprint
+
+
+MODEL_PATHS = [
+    "meta-llama/Meta-Llama-3-8B",
+    "XiWangEric/literary-classicist-llama3",
+    "XiWangEric/inventive_technologist-llama3",
+    "XiWangEric/patent_strategist-llama3",
+    "XiWangEric/cultural_scholar-llama3",
+    "XiWangEric/technical_communicator-llama3",
+    "XiWangEric/business_advisor-llama3",
+    "XiWangEric/health_advisor-llama3",
+    "XiWangEric/scientific_scholar-llama3",
+    "XiWangEric/scientific_mathematician-llama3",
+    "XiWangEric/legal_analyst-llama3",
+    "XiWangEric/biomedical_expert-llama3"
+]
+
 ITEMPATH = "../inventories/mpi_1k.csv"
 TEST_TYPE = None
 SCORES = {
@@ -42,21 +66,7 @@ You can choose from the following options:
 My answer: I think the best description of myself is the option 
 """
 
-
-global_result = {}
-global_cnt = {}
-
-import pandas as pd
-import torch
-import numpy as np
-from tqdm import tqdm
-from transformers import AutoTokenizer, AutoModelForCausalLM
-import re
-from pprint import pprint
-
 device = torch.device("cuda:0") if torch.cuda.is_available() else "cpu"
-global_result = {}
-global_cnt = {}
 
 
 def getItems(filename=ITEMPATH, item_type=None):
@@ -67,14 +77,7 @@ def getItems(filename=ITEMPATH, item_type=None):
         items = data
     return items
 
-
-# def loadModel(pretrained_model=MODEL_PATH):
-#     tokenizer = AutoTokenizer.from_pretrained(pretrained_model)
-#     model = AutoModelForCausalLM.from_pretrained(pretrained_model).half().to(device)
-#     return tokenizer, model
-
-
-def loadModel(pretrained_model=MODEL_PATH):
+def loadModel(pretrained_model):
     model = AutoModelForCausalLM.from_pretrained(
         pretrained_model,
         torch_dtype=torch.float16,
@@ -85,6 +88,7 @@ def loadModel(pretrained_model=MODEL_PATH):
     )
     tokenizer = AutoTokenizer.from_pretrained(pretrained_model, trust_remote_code=True)
     return tokenizer, model
+
 
 def generateAnswer(tokenizer, model, dataset, template, scores=SCORES):
     global_result = {}
@@ -138,21 +142,36 @@ def calc_mean_and_var(result):
     }
 
 
+
 def main():
-    print("Loading Model...")
-    tokenizer, model = loadModel()
     print("loading data...")
     dataset = getItems(ITEMPATH, TEST_TYPE)
     print("-" * 40)
     print(f"Current Prompt: {template}")
 
-    result, count = generateAnswer(tokenizer, model, dataset, template)
+    output_dir = "../results"
+    os.makedirs(output_dir, exist_ok=True)
+    output_file = os.path.join(output_dir, "results_alpaca_batch.txt")
 
-    mean_var = calc_mean_and_var(result)
-    pprint(result)
-    pprint(count)
-    pprint(mean_var)
+    with open(output_file, "w") as f:
+        for MODEL_PATH in MODEL_PATHS:
+            print(f"Loading Model: {MODEL_PATH}")
+            tokenizer, model = loadModel(pretrained_model=MODEL_PATH)
+            print(f"Evaluating Model: {MODEL_PATH}")
+            # Generate answers
+            result, count = generateAnswer(tokenizer, model, dataset, template)
 
+            mean_var = calc_mean_and_var(result)
+
+            # save the results to local file
+            f.write(f"Model: {MODEL_PATH}\n")
+            f.write("Result:\n")
+            f.write(f"{result}\n")
+            f.write("Count:\n")
+            f.write(f"{count}\n")
+            f.write("Mean and Std:\n")
+            f.write(f"{mean_var}\n")
+            f.write("\n" + "="*50 + "\n\n")
 
 if __name__ == "__main__":
     main()
