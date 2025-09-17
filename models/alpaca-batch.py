@@ -1,3 +1,4 @@
+import gc
 import os
 import pandas as pd
 import torch
@@ -172,6 +173,13 @@ def main():
             f.write("Mean and Std:\n")
             f.write(f"{mean_var}\n")
             f.write("\n" + "="*50 + "\n\n")
+
+            # ---- Clean up memory ----
+            del model
+            del tokenizer
+            gc.collect()
+            if torch.cuda.is_available():
+                torch.cuda.empty_cache()
 
 if __name__ == "__main__":
     main()
