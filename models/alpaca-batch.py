@@ -174,6 +174,8 @@ def main():
             f.write(f"{mean_var}\n")
             f.write("\n" + "="*50 + "\n\n")
 
+            f.flush()
+            os.fsync(f.fileno())
             # ---- Clean up memory ----
             del model
             del tokenizer
