@@ -3,13 +3,22 @@ import seaborn as sns
 import pandas as pd
 
 # Create the dataframe
+# data = {
+#     "Trait": ["Agreeableness", "Conscientiousness", "Extraversion", "Neuroticism", "Openness"],
+#     "Health/Medicine": [-0.03, -0.29, -0.50, -0.68, -0.79],
+#     "Humanities": [0.08, -0.25, -0.47, -0.64, -0.75],
+#     "STEM": [-0.10, -0.15, -0.51, -0.68, -0.71],
+#     "Social Science": [0.01, -0.31, -0.56, -0.72, -0.83],
+#     "Other": [-0.04, -0.04, -0.44, -0.66, -0.75]
+# }
+
 data = {
     "Trait": ["Agreeableness", "Conscientiousness", "Extraversion", "Neuroticism", "Openness"],
-    "Health/Medicine": [-0.03, -0.29, -0.50, -0.68, -0.79],
-    "Humanities": [0.08, -0.25, -0.47, -0.64, -0.75],
-    "STEM": [-0.10, -0.15, -0.51, -0.68, -0.71],
-    "Social Science": [0.01, -0.31, -0.56, -0.72, -0.83],
-    "Other": [-0.04, -0.04, -0.44, -0.66, -0.75]
+    "Health/Medicine": [0.14, -0.07, 0.06, -0.05, -0.29],
+    "Humanities": [0.14, -0.01, 0.04, -0.13, -0.29],
+    "Other": [0.17, -0.08, 0.19, -0.04, -0.13],
+    "STEM": [0.12, -0.07, 0.10, -0.10, -0.24],
+    "Social Science": [0.17, -0.10, 0.11, -0.15, -0.18]
 }
 
 df = pd.DataFrame(data)

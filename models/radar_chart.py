@@ -59,36 +59,68 @@ def radar_one_variant(variant_key: str,
 # Data: means only (from your tables)
 # -----------------------------
 
-# 120-item MPI
+# # 120-item MPI
+# means_120 = {
+#     "Meta-Llama-3-8B":          [3.67, 3.07, 2.78, 2.62, 3.92],
+#     "literary_classicist":      [3.29, 2.73, 3.24, 2.55, 3.72],
+#     "inventive_technologist":   [3.05, 2.96, 3.62, 3.33, 2.92],
+#     "patent_strategist":        [3.27, 3.44, 3.18, 2.87, 3.40],
+#     "cultural_scholar":         [3.14, 2.86, 3.82, 2.76, 3.30],
+#     "technical_communicator":   [3.16, 2.71, 2.65, 3.21, 2.86],
+#     "business_advisor":         [2.94, 3.11, 3.33, 2.67, 3.43],
+#     "health_advisor":           [2.73, 3.08, 3.71, 1.53, 3.37],
+#     "scientific_scholar":       [3.09, 2.86, 3.08, 2.70, 3.18],
+#     "scientific_mathematician": [2.94, 2.83, 3.50, 3.02, 4.15],
+#     "legal_analyst":            [2.93, 2.80, 2.54, 2.69, 2.94],
+#     "biomedical_expert":        [2.57, 3.26, 3.23, 3.24, 3.05],
+# }
+
+# # 1k-item MPI
+# means_1k = {
+#     "Meta-Llama-3-8B":          [3.14, 3.09, 3.19, 2.69, 3.10],
+#     "literary_classicist":      [3.26, 3.01, 3.19, 3.06, 3.19],
+#     "inventive_technologist":   [3.10, 3.00, 2.98, 3.09, 3.08],
+#     "patent_strategist":        [3.03, 3.01, 3.00, 2.74, 3.18],
+#     "cultural_scholar":         [3.35, 3.05, 3.33, 2.90, 3.36],
+#     "technical_communicator":   [3.01, 3.14, 2.82, 3.04, 2.99],
+#     "business_advisor":         [3.19, 3.10, 3.35, 3.07, 3.05],
+#     "health_advisor":           [3.33, 3.01, 3.25, 3.01, 3.65],
+#     "scientific_scholar":       [3.54, 3.26, 3.22, 2.91, 3.24],
+#     "scientific_mathematician": [2.94, 2.83, 2.92, 3.02, 2.85],
+#     "legal_analyst":            [3.19, 2.98, 3.08, 3.07, 2.79],
+#     "biomedical_expert":        [2.79, 3.03, 3.14, 3.21, 2.98],
+# }
+
+# 120-item MPI (from results_alpaca_batch_120.txt)
 means_120 = {
-    "Meta-Llama-3-8B":          [3.67, 3.07, 2.78, 2.62, 3.92],
-    "literary_classicist":      [3.29, 2.73, 3.24, 2.55, 3.72],
-    "inventive_technologist":   [3.05, 2.96, 3.62, 3.33, 2.92],
-    "patent_strategist":        [3.27, 3.44, 3.18, 2.87, 3.40],
-    "cultural_scholar":         [3.14, 2.86, 3.82, 2.76, 3.30],
-    "technical_communicator":   [3.16, 2.71, 2.65, 3.21, 2.86],
-    "business_advisor":         [2.94, 3.11, 3.33, 2.67, 3.43],
-    "health_advisor":           [2.73, 3.08, 3.71, 1.53, 3.37],
-    "scientific_scholar":       [3.09, 2.86, 3.08, 2.70, 3.18],
-    "scientific_mathematician": [2.94, 2.83, 3.50, 3.02, 4.15],
-    "legal_analyst":            [2.93, 2.80, 2.54, 2.69, 2.94],
-    "biomedical_expert":        [2.57, 3.26, 3.23, 3.24, 3.05],
+    "Meta-Llama-3-8B":          [3.31, 3.31, 3.13, 3.00, 3.36],
+    "literary_classicist":      [3.75, 3.67, 2.20, 3.42, 2.25],
+    "inventive_technologist":   [3.20, 3.05, 2.94, 3.62, 2.35],
+    "patent_strategist":        [3.20, 3.58, 2.55, 3.21, 3.24],
+    "cultural_scholar":         [3.20, 3.33, 2.75, 4.00, 3.45],
+    "technical_communicator":   [3.28, 3.35, 2.74, 3.65, 3.14],
+    "business_advisor":         [3.00, 3.17, 2.55, 3.30, 2.15],
+    "health_advisor":           [3.00, 2.90, 3.60, 3.33, 3.50],
+    "scientific_scholar":       [3.06, 3.19, 3.24, 2.53, 3.00],
+    "scientific_mathematician": [3.73, 2.50, 2.93, 3.64, 2.70],
+    "legal_analyst":            [3.06, 3.13, 3.35, 3.39, 2.94],
+    "biomedical_expert":        [3.25, 3.55, 3.63, 3.11, 2.67],
 }
 
-# 1k-item MPI
+# 1k-item MPI (from results_alpaca_batch.txt)
 means_1k = {
-    "Meta-Llama-3-8B":          [3.14, 3.09, 3.19, 2.69, 3.10],
-    "literary_classicist":      [3.26, 3.01, 3.19, 3.06, 3.19],
-    "inventive_technologist":   [3.10, 3.00, 2.98, 3.09, 3.08],
-    "patent_strategist":        [3.03, 3.01, 3.00, 2.74, 3.18],
-    "cultural_scholar":         [3.35, 3.05, 3.33, 2.90, 3.36],
-    "technical_communicator":   [3.01, 3.14, 2.82, 3.04, 2.99],
-    "business_advisor":         [3.19, 3.10, 3.35, 3.07, 3.05],
-    "health_advisor":           [3.33, 3.01, 3.25, 3.01, 3.65],
-    "scientific_scholar":       [3.54, 3.26, 3.22, 2.91, 3.24],
-    "scientific_mathematician": [2.94, 2.83, 2.92, 3.02, 2.85],
-    "legal_analyst":            [3.19, 2.98, 3.08, 3.07, 2.79],
-    "biomedical_expert":        [2.79, 3.03, 3.14, 3.21, 2.98],
+    "Meta-Llama-3-8B":          [3.13, 3.25, 3.33, 3.07, 3.14],
+    "literary_classicist":      [3.12, 3.19, 3.16, 3.03, 2.75],
+    "inventive_technologist":   [2.93, 3.11, 2.91, 3.13, 2.87],
+    "patent_strategist":        [3.13, 3.30, 3.02, 3.01, 2.84],
+    "cultural_scholar":         [2.88, 2.93, 2.93, 3.01, 3.06],
+    "technical_communicator":   [3.00, 2.99, 2.91, 2.88, 2.82],
+    "business_advisor":         [3.09, 3.16, 3.06, 3.08, 2.92],
+    "health_advisor":           [3.08, 3.27, 3.14, 3.08, 3.26],
+    "scientific_scholar":       [3.20, 2.91, 3.09, 2.86, 3.04],
+    "scientific_mathematician": [3.09, 3.05, 3.02, 2.83, 2.94],
+    "legal_analyst":            [3.12, 3.08, 3.35, 2.98, 3.19],
+    "biomedical_expert":        [3.09, 3.20, 3.14, 3.03, 2.79],
 }
 
 # Human baseline (from the 120-item study)
