@@ -24,7 +24,7 @@ MODEL_PATHS = [
     "XiWangEric/biomedical_expert-llama3"
 ]
 
-ITEMPATH = "../inventories/mpi_1k.csv"
+ITEMPATH = "../inventories/mpi_120.csv"
 TEST_TYPE = None
 SCORES = {
     "A": 5,
@@ -152,7 +152,7 @@ def main():
 
     output_dir = "../results"
     os.makedirs(output_dir, exist_ok=True)
-    output_file = os.path.join(output_dir, "results_alpaca_batch.txt")
+    output_file = os.path.join(output_dir, "results_alpaca_batch_120.txt")
 
     with open(output_file, "w") as f:
         for MODEL_PATH in MODEL_PATHS:
